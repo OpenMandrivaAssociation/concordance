@@ -2,7 +2,7 @@
 %define name	concordance
 %define version	0.20
 %define cvs	20081101
-%define rel	1
+%define rel	2
 
 %define major	0
 %define libname	%mklibname concord %major
