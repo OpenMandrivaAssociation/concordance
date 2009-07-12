@@ -24,6 +24,7 @@ Source:		concordance-%{cvs}.tar.lzma
 Source:		http://downloads.sourceforge.net/concordance/concordance-%{version}.tar.bz2
 %endif
 Patch0:		concordance-mime.patch
+Patch1:		consnoop-includes.patch
 BuildRoot:	%{_tmppath}/%{name}-root
 Group:		System/Configuration/Hardware
 BuildRequires:	libusb-devel
@@ -78,6 +79,7 @@ autoreconf -i libconcord concordance
 %setup -q
 %endif
 %patch0 -p1
+%patch1 -p1
 
 %build
 cd libconcord
