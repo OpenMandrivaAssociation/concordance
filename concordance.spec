@@ -1,10 +1,10 @@
 
 %define name	concordance
-%define version	0.20
-%define cvs	20081101
-%define rel	2
+%define version	0.21
+%define cvs	0
+%define rel	1
 
-%define major	0
+%define major	1
 %define libname	%mklibname concord %major
 %define devname	%mklibname concord -d 
 
@@ -23,6 +23,7 @@ Source:		concordance-%{cvs}.tar.lzma
 %else
 Source:		http://downloads.sourceforge.net/concordance/concordance-%{version}.tar.bz2
 %endif
+Patch0:		concordance-mime.patch
 BuildRoot:	%{_tmppath}/%{name}-root
 Group:		System/Configuration/Hardware
 BuildRequires:	libusb-devel
@@ -76,11 +77,17 @@ autoreconf -i libconcord concordance
 %else
 %setup -q
 %endif
+%patch0 -p1
 
 %build
 cd libconcord
-%configure2_5x --disable-static
+# patch0
+autoreconf -f
+libtoolize -f
+%configure2_5x --disable-static --disable-mime-update
 %make
+# We do not need this, logged-in users have already access to USB devices
+#make policykit
 cd bindings/perl
 swig -perl5 concord.i
 %{__perl} Makefile.PL INSTALLDIRS=vendor INC=-I../.. LIBS="-L../../.libs -lconcord"
@@ -109,6 +116,9 @@ install -m755 consnoop/consnoop %{buildroot}%{_bindir}
 
 rm -f %{buildroot}%{_libdir}/libconcord.la
 
+# add major to name (alternative: create libconcord-common)
+mv %{buildroot}%{_datadir}/mime/packages/{libconcord,%{libname}}.xml
+
 %clean
 rm -rf %{buildroot}
 
@@ -122,6 +132,7 @@ rm -rf %{buildroot}
 %files -n %{libname}
 %defattr(-,root,root)
 %{_libdir}/libconcord.so.%{major}*
+%{_datadir}/mime/packages/%{libname}.xml
 
 %files -n %{devname}
 %defattr(-,root,root)
