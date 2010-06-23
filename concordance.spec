@@ -2,7 +2,7 @@
 %define name	concordance
 %define version	0.21
 %define cvs	0
-%define rel	1
+%define rel	2
 
 %define major	1
 %define libname	%mklibname concord %major
@@ -25,6 +25,8 @@ Source:		http://downloads.sourceforge.net/concordance/concordance-%{version}.tar
 %endif
 Patch0:		concordance-mime.patch
 Patch1:		consnoop-includes.patch
+Patch2:		concordance-clean-udev-rules.patch
+Patch3:		concordance-udev-acl.patch
 BuildRoot:	%{_tmppath}/%{name}-root
 Group:		System/Configuration/Hardware
 BuildRequires:	libusb-devel
@@ -37,9 +39,17 @@ BuildRequires:	chrpath
 This command-line software allows you to program your Logitech Harmony
 remote using a configuration object retreived from the Harmony website.
 
+%package -n libconcord-common
+Summary:	Common files of libconcord
+Group:		System/Libraries
+
+%description -n libconcord-common
+Common files required by Logitech Harmony remote programmer library.
+
 %package -n %libname
 Summary:	System library of libconcord
 Group:		System/Libraries
+Requires:	libconcord-common >= %{version}-%{release}
 
 %description -n %libname
 Logitech Harmony remote programmer library for applications that use it.
@@ -48,7 +58,7 @@ Logitech Harmony remote programmer library for applications that use it.
 Summary:	Development headers for libconcord
 Group:		Development/C
 Requires:	%libname = %version
-Provides:	concord-devel = %version
+Provides:	concord-devel = %version-%release
 
 %description -n %devname
 Development headers for developing applications that use libconcord, a
@@ -80,6 +90,8 @@ autoreconf -i libconcord concordance
 %endif
 %patch0 -p1
 %patch1 -p1
+%patch2 -p1
+%patch3 -p1
 
 %build
 cd libconcord
@@ -88,8 +100,10 @@ autoreconf -f
 libtoolize -f
 %configure2_5x --disable-static --disable-mime-update
 %make
-# We do not need this, logged-in users have already access to USB devices
-#make policykit
+%if %{mdkversion} >= 201000
+# Not needed on older releases, logged-in users have already access to USB devices
+%make udev_acl1
+%endif
 cd bindings/perl
 swig -perl5 concord.i
 %{__perl} Makefile.PL INSTALLDIRS=vendor INC=-I../.. LIBS="-L../../.libs -lconcord"
@@ -100,11 +114,15 @@ cd concordance
 %make
 cd ..
 cd consnoop
-%make CXXFLAGS="%optflags"
+%make CXXFLAGS="%optflags %{?ldflags}"
 
 %install
 rm -rf %{buildroot}
-%makeinstall_std -C libconcord
+%makeinstall_std -C libconcord \
+%if %{mdkversion} >= 201000
+	install_udev_acl1
+%endif
+#
 %makeinstall_std -C libconcord/bindings/perl
 chrpath -d %{buildroot}%{perl_vendorarch}/auto/concord/concord.so
 %makeinstall_std -C concordance
@@ -118,11 +136,13 @@ install -m755 consnoop/consnoop %{buildroot}%{_bindir}
 
 rm -f %{buildroot}%{_libdir}/libconcord.la
 
-# add major to name (alternative: create libconcord-common)
-mv %{buildroot}%{_datadir}/mime/packages/{libconcord,%{libname}}.xml
-
 %clean
 rm -rf %{buildroot}
+
+%post -n libconcord-common
+# apply new/updated rules
+/sbin/udevadm trigger --subsystem-match=usb --attr-match=idVendor=046d --attr-match=idProduct="c1*"
+/sbin/udevadm trigger --subsystem-match=usb --attr-match=idVendor=0400 --attr-match=idProduct="c359"
 
 %files
 %defattr(-,root,root)
@@ -131,10 +151,16 @@ rm -rf %{buildroot}
 %{_bindir}/concordance
 %{_mandir}/man1/concordance*
 
+%files -n libconcord-common
+%defattr(-,root,root)
+%if %{mdkversion} >= 201000
+/lib/udev/rules.d/60-libconcord.rules
+%endif
+%{_datadir}/mime/packages/libconcord.xml
+
 %files -n %{libname}
 %defattr(-,root,root)
 %{_libdir}/libconcord.so.%{major}*
-%{_datadir}/mime/packages/%{libname}.xml
 
 %files -n %{devname}
 %defattr(-,root,root)
