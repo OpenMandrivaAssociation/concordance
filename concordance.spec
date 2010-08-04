@@ -1,8 +1,8 @@
 
 %define name	concordance
-%define version	0.21
+%define version	0.22
 %define cvs	0
-%define rel	3
+%define rel	1
 
 %define major	1
 %define libname	%mklibname concord %major
@@ -88,7 +88,7 @@ autoreconf -i libconcord concordance
 %else
 %setup -q
 %endif
-%patch0 -p1
+%patch0 -p1 -b .mime
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
@@ -96,8 +96,7 @@ autoreconf -i libconcord concordance
 %build
 cd libconcord
 # patch0
-autoreconf -f
-libtoolize -f
+autoreconf -fi
 %configure2_5x --disable-static --disable-mime-update
 %make
 %if %{mdkversion} >= 201000
