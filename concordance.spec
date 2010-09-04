@@ -1,10 +1,10 @@
 
 %define name	concordance
-%define version	0.22
+%define version	0.23
 %define cvs	0
 %define rel	1
 
-%define major	1
+%define major	2
 %define libname	%mklibname concord %major
 %define devname	%mklibname concord -d 
 
@@ -99,9 +99,13 @@ cd libconcord
 autoreconf -fi
 %configure2_5x --disable-static --disable-mime-update
 %make
-%if %{mdkversion} >= 201000
-# Not needed on older releases, logged-in users have already access to USB devices
-%make udev_acl1
+%if %{mdkversion} >= 201100
+ %make udev_acl2
+%else
+ %if %{mdkversion} >= 201000
+  # Not needed on older releases, logged-in users have already access to USB devices
+  %make udev_acl1
+%endif
 %endif
 cd bindings/perl
 swig -perl5 concord.i
@@ -118,8 +122,12 @@ cd consnoop
 %install
 rm -rf %{buildroot}
 %makeinstall_std -C libconcord \
-%if %{mdkversion} >= 201000
+%if %{mdkversion} >= 201100
+	install_udev_acl2
+%else
+ %if %{mdkversion} >= 201000
 	install_udev_acl1
+ %endif
 %endif
 #
 %makeinstall_std -C libconcord/bindings/perl
