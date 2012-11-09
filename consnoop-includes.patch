@@ -1,0 +1,10 @@
+--- concordance-0.21/consnoop/consnoop.cpp.old	2009-02-04 22:51:23.000000000 +0200
++++ concordance-0.21/consnoop/consnoop.cpp	2009-07-12 18:58:27.000000000 +0300
+@@ -25,6 +25,7 @@
+ #include <string.h>
+ #include <fstream>
+ #include <stdlib.h>
++#include <stdint.h>
+ #ifdef WIN32
+ typedef unsigned char uint8_t;
+ #include "../concordance/win/getopt/getopt.h"
