@@ -1,12 +1,16 @@
 
+%define name	concordance
+%define version	0.24
+%define rel	1
+
 %define major	2
 %define libname	%mklibname concord %major
 %define devname	%mklibname concord -d 
 
 Summary:	Command-line Logitech Harmony remote programmer
-Name:		concordance
-Version:	0.23
-Release:	3
+Name:		%{name}
+Version:	%{version}
+Release:	%mkrel %{rel}
 License:	GPLv3+
 URL:		http://www.phildev.net/harmony/
 Source0:	http://downloads.sourceforge.net/concordance/concordance-%{version}.tar.bz2
@@ -14,54 +18,55 @@ Patch0:		concordance-mime.patch
 Patch1:		consnoop-includes.patch
 Patch2:		concordance-clean-udev-rules.patch
 Patch3:		concordance-udev-acl.patch
+Patch4:		concordance-0.24-automake1.12.patch
 Group:		System/Configuration/Hardware
-BuildRequires:	libusb-devel
-BuildRequires:	python-devel
+BuildRequires:	pkgconfig(libusb)
+BuildRequires:	pkgconfig(python)
 BuildRequires:	swig
 BuildRequires:	perl-devel
 BuildRequires:	chrpath
 
 %description
 This command-line software allows you to program your Logitech Harmony
-remote using a configuration object retreived from the Harmony website.
+remote using a configuration object retrieved from the Harmony website.
 
-%package -n	libconcord-common
+%package -n libconcord-common
 Summary:	Common files of libconcord
 Group:		System/Libraries
 
-%description -n	libconcord-common
+%description -n libconcord-common
 Common files required by Logitech Harmony remote programmer library.
 
-%package -n	%{libname}
+%package -n %libname
 Summary:	System library of libconcord
 Group:		System/Libraries
 Requires:	libconcord-common >= %{version}-%{release}
 
-%description -n	%{libname}
+%description -n %libname
 Logitech Harmony remote programmer library for applications that use it.
 
-%package -n	%{devname}
+%package -n %devname
 Summary:	Development headers for libconcord
 Group:		Development/C
-Requires:	%{libname} = %{version}
-Provides:	concord-devel = %{version}-%{release}
+Requires:	%libname = %version
+Provides:	concord-devel = %version-%release
 
-%description -n	%{devname}
+%description -n %devname
 Development headers for developing applications that use libconcord, a
 Logitech Harmony remote programmer library.
 
-%package -n	perl-concord
+%package -n perl-concord
 Summary:	Perl bindings for libconcord
 Group:		Development/Perl
 
-%description -n	perl-concord
+%description -n perl-concord
 Perl bindings for libconcord, a Logitech Harmony remote programmer
 library.
 
-%package -n	python-libconcord
+%package -n python-libconcord
 Summary:	Python bindings for libconcord
 Group:		Development/Python
-Requires:	%{libname}
+Requires:	%libname
 
 %description -n python-libconcord
 Python bindings for libconcord, a Logitech Harmony remote programmer
@@ -73,6 +78,7 @@ library.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
 
 %build
 cd libconcord
@@ -80,14 +86,7 @@ cd libconcord
 autoreconf -fi
 %configure2_5x --disable-static --disable-mime-update
 %make
-%if %{mdkversion} >= 201100
  %make udev_acl2
-%else
- %if %{mdkversion} >= 201000
-  # Not needed on older releases, logged-in users have already access to USB devices
-  %make udev_acl1
-%endif
-%endif
 cd bindings/perl
 swig -perl5 concord.i
 %{__perl} Makefile.PL INSTALLDIRS=vendor INC=-I../.. LIBS="-L../../.libs -lconcord"
@@ -98,18 +97,12 @@ cd concordance
 %make
 cd ..
 cd consnoop
-%make CXXFLAGS="%{optflags} %{?ldflags}"
+%make CXXFLAGS="%optflags %{?ldflags}"
 
 %install
 %makeinstall_std -C libconcord \
-%if %{mdkversion} >= 201100
 	install_udev_acl2
-%else
- %if %{mdkversion} >= 201000
-	install_udev_acl1
- %endif
-%endif
-#
+
 %makeinstall_std -C libconcord/bindings/perl
 chrpath -d %{buildroot}%{perl_vendorarch}/auto/concord/concord.so
 %makeinstall_std -C concordance
@@ -129,15 +122,14 @@ rm -f %{buildroot}%{_libdir}/libconcord.la
 /sbin/udevadm trigger --subsystem-match=usb --attr-match=idVendor=0400 --attr-match=idProduct="c359"
 
 %files
+%defattr(-,root,root)
 %doc concordance/README
 %doc Changelog
 %{_bindir}/concordance
 %{_mandir}/man1/concordance*
 
 %files -n libconcord-common
-%if %{mdkversion} >= 201000
 /lib/udev/rules.d/60-libconcord.rules
-%endif
 %{_datadir}/mime/packages/libconcord.xml
 
 %files -n %{libname}

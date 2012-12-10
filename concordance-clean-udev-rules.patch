@@ -1,18 +1,15 @@
-Index: concordance-0.21/libconcord/gen_udev_support
-===================================================================
---- concordance-0.21/libconcord/gen_udev_support
-+++ concordance-0.21/libconcord/gen_udev_support	2010-06-23 07:38:45.840416226 +0300
-@@ -64,18 +64,15 @@
+--- concordance-0.24/libconcord/gen_udev_support.orig	2012-03-15 15:03:25.000000000 +0800
++++ concordance-0.24/libconcord/gen_udev_support	2012-10-18 10:36:25.505632770 +0800
+@@ -65,18 +65,15 @@
      file="$1"
      cat >$file <<END
  # Neat trick so that non-harmony devices don't read through a million rules
 -SUBSYSTEM=="usb_device", GOTO="harmony_usb_rules"
 -SUBSYSTEM=="usb", GOTO="harmony_usb_rules"
--BUS!="usb", GOTO="harmony_rules_end"
++ACTION!="add|change", GOTO="harmony_rules_end"
+ SUBSYSTEM!="usb", GOTO="harmony_rules_end"
 -GOTO="harmony_rules_end"
 -LABEL="harmony_usb_rules"
-+ACTION!="add|change", GOTO="harmony_rules_end"
-+SUBSYSTEM!="usb", GOTO="harmony_rules_end"
 +ENV{DEVTYPE}!="usb_device", GOTO="harmony_rules_end"
  END
  }

@@ -1,0 +1,9 @@
+--- a/libconcord/configure.ac~	2012-11-07 20:08:13.955244712 +0800
++++ b/libconcord/configure.ac	2012-11-07 20:08:57.046292469 +0800
+@@ -1,5 +1,6 @@
+ AC_INIT([libconcord], [0.24], [bug-automake@gnu.org])
+ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
++AM_PROG_AR
+ AC_CONFIG_MACRO_DIR([m4])
+ AC_PROG_LIBTOOL
+ AC_PROG_CXX

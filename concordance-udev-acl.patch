@@ -1,29 +1,6 @@
-Index: concordance-0.21/libconcord/INSTALL.linux
-===================================================================
---- concordance-0.21/libconcord/INSTALL.linux
-+++ concordance-0.21/libconcord/INSTALL.linux	2010-06-23 08:06:31.866416256 +0300
-@@ -51,6 +51,16 @@
-   make consolekit
-   sudo make install_consolekit
- 
-+If your system is using udev-acl with udev 153 or older, you can use:
-+
-+  make udev_acl1
-+  sudo make install_udev_acl1
-+
-+If your system is using udev-acl with udev 154 or newer, you can use:
-+
-+  make udev_acl2
-+  sudo make install_udev_acl2
-+
- If you're not sure which method your system uses, the udev one will work on
- all systems. 
- 
-Index: concordance-0.21/libconcord/Makefile.am
-===================================================================
---- concordance-0.21/libconcord/Makefile.am
-+++ concordance-0.21/libconcord/Makefile.am	2010-06-23 08:37:22.316478786 +0300
-@@ -37,6 +37,17 @@
+--- concordance-0.24/libconcord/Makefile.am.orig	2012-10-18 10:37:00.256518957 +0800
++++ concordance-0.24/libconcord/Makefile.am	2012-10-18 10:37:00.266519212 +0800
+@@ -43,6 +43,17 @@
  	$(install_sh_DATA) libconcord.perms \
  		$(DESTDIR)$(datarootdir)/hal/fdi/policy/10osvendor/99-libconcord.perms
  
@@ -41,20 +18,18 @@ Index: concordance-0.21/libconcord/Makefile.am
  # MIME stuff
  
  newmimedir = $(datadir)/mime/packages
-Index: concordance-0.21/libconcord/gen_udev_support
-===================================================================
---- concordance-0.21/libconcord/gen_udev_support
-+++ concordance-0.21/libconcord/gen_udev_support	2010-06-23 08:09:25.744416496 +0300
-@@ -16,6 +16,8 @@
- 
+--- concordance-0.24/libconcord/gen_udev_support.orig	2012-10-18 10:37:00.000000000 +0800
++++ concordance-0.24/libconcord/gen_udev_support	2012-10-18 10:40:22.361678889 +0800
+@@ -17,6 +17,8 @@
  UDEV_POLICY_TEMPLATE='ATTR{idVendor}=="%s", ATTR{idProduct}=="%s", SYMLINK+="harmony-%%k"'
- UDEV_NO_POLICY_TEMPLATE='SYSFS{idVendor}=="%s", SYSFS{idProduct}=="%s", MODE="0660", GROUP="dialout"'
-+UDEV_ACL1_TEMPLATE='ATTR{idVendor}=="%s", ATTR{idProduct}=="%s", ENV{ACL_MANAGE}="1"'
-+UDEV_ACL2_TEMPLATE='ATTR{idVendor}=="%s", ATTR{idProduct}=="%s", TAG+="udev-acl"'
+ UDEV_NEW_NO_POLICY_TEMPLATE='ATTR{idVendor}=="%s", ATTR{idProduct}=="%s", ENV{ID_REMOTE_CONTROL}="1"'
+ UDEV_OLD_NO_POLICY_TEMPLATE='SYSFS{idVendor}=="%s", SYSFS{idProduct}=="%s", MODE="0660", GROUP="dialout"'
++UDEV_ACL1_TEMPLATE='ATTR{idVendor}=="%s", ATTR{idProduct}=="%s",ENV{ACL_MANAGE}="1"'
++UDEV_ACL2_TEMPLATE='ATTR{idVendor}=="%s", ATTR{idProduct}=="%s",TAG+="udev-acl"'
  
  HAL_PRE_TEMPLATE='    <match key="usb_device.vendor_id" int="0x%s">'
  HAL_RULE_TEMPLATE='      <match key="usb_device.product_id" int="0x%s">
-@@ -82,6 +84,10 @@
+@@ -83,6 +85,10 @@
      type="$2"
      if [ "$type" == 'policykit' -o "$type" == 'consolekit' ]; then
          template="$UDEV_POLICY_TEMPLATE"
@@ -62,29 +37,29 @@ Index: concordance-0.21/libconcord/gen_udev_support
 +        template="$UDEV_ACL1_TEMPLATE"
 +    elif [ "$type" == 'udev_acl2' ]; then
 +        template="$UDEV_ACL2_TEMPLATE"
+     elif [ "$type" == 'old_udev' ]; then
+         template="$UDEV_OLD_NO_POLICY_TEMPLATE"
      else
-         template="$UDEV_NO_POLICY_TEMPLATE"
-     fi
-@@ -189,14 +195,14 @@
+@@ -192,14 +198,14 @@
  #
  
  usage() {
--    echo "Usage: $0 <-u|-p|-c>"
-+    echo "Usage: $0 <-u|-p|-c|-a|-b>"
+-    echo "Usage: $0 <-u|-p|-c|-o>"
++    echo "Usage: $0 <-u|-p|-c|-o|-a|-b>"
  }
  
  #
  # MAIN
  #
  
--while getopts upc opt; do
-+while getopts upcab opt; do
+-while getopts upco opt; do
++while getopts upcoab opt; do
      case $opt in
          u)
              MODE='udev_only'
-@@ -207,6 +213,12 @@
-         c)
-             MODE='consolekit'
+@@ -213,6 +219,12 @@
+         o)
+             MODE='old_udev'
              ;;
 +        a)
 +            MODE='udev_acl1'
