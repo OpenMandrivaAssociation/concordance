@@ -1,3 +1,5 @@
-sources:
-  "concordance-0.23.tar.bz2": 7cd2b3dbc0b5f9237290bae46671153327ee3b62
+removed_sources:
+  concordance-0.23.tar.bz2: 7cd2b3dbc0b5f9237290bae46671153327ee3b62
   concordance-0.24.tar.bz2: cb2d80a7e69ec309da87a3d358933e6053a45197
+sources:
+  concordance-1.0.tar.bz2: 8e51d5d9b2019df84326c480b793cc769e68908d
