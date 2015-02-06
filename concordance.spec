@@ -5,7 +5,7 @@
 Summary:	Command-line Logitech Harmony remote programmer
 Name:		concordance
 Version:	1.0
-Release:	1
+Release:	2
 License:	GPLv3+
 URL:		http://www.phildev.net/harmony/
 Source:		http://downloads.sourceforge.net/concordance/concordance-%{version}.tar.bz2
