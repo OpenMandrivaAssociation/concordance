@@ -7,7 +7,7 @@ Name:		concordance
 Version:	1.0
 Release:	2
 License:	GPLv3+
-URL:		http://www.phildev.net/harmony/
+URL:		https://www.phildev.net/harmony/
 Source:		http://downloads.sourceforge.net/concordance/concordance-%{version}.tar.bz2
 Patch0:		concordance-mime.patch
 Patch1:		consnoop-includes.patch
